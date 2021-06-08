@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const errorHandler = require("./middleware/errorHandler");
 
 connectDB();
 
@@ -14,6 +15,9 @@ app.use(cors());
 
 // Routes
 app.use("/api/v1/locations", require("./routes/locationRoutes"));
+
+// Error Handler
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 8000;
 
