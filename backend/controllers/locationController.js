@@ -21,7 +21,17 @@ exports.getAllLocations = asyncHandler(async (req, res, next) => {
 
   query = Location.find(JSON.parse(queryStr));
 
-  const locations = await Location.find(JSON.parse(queryStr));
+  if (req.query.sort) {
+    const sortByArr = req.query.sort.split(",");
+
+    const sortByStr = sortByArr.join(" ");
+
+    query = query.sort(sortByStr);
+  } else {
+    query = query.sort("-objectId");
+  }
+
+  const locations = await query;
 
   res.status(200).json({
     success: true,
