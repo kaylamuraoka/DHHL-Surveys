@@ -16,3 +16,4 @@ Create back-end with node.js and express
 
 dao directory - stands for data access object
 Create front-end with React.js:
+Mongo Db uses MongoDB query language
