@@ -1,7 +1,7 @@
 import logo from "./logo.svg";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
-import LocationPage from "./pages/LocationPage";
+import LocationsPage from "./pages/LocationsPage";
 
 import Navbar from "./components/Navbar";
 
@@ -11,7 +11,7 @@ function App() {
       <Navbar />
       <Router>
         <Switch>
-          <Route exact path="/" component={LocationPage} />
+          <Route exact path="/" component={LocationsPage} />
         </Switch>
       </Router>
       {/* <header className="App-header">
