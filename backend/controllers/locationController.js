@@ -6,11 +6,23 @@ exports.getAllLocations = asyncHandler(async (req, res, next) => {
   // Sync a query to out mongodb database and retrieve a response
   let query;
 
+  let uiValues = {
+    filtering: {},
+    sorting: {},
+  };
+
   const reqQuery = { ...req.query };
 
   const removeFields = ["sort", "page"];
 
   removeFields.forEach((val) => delete reqQuery[val]);
+
+  const filterKeys = Object.keys(reqQuery);
+  const filterValues = Object.values(reqQuery);
+
+  filterKeys.forEach(
+    (val, idx) => (uiValues.filtering[val] = filterValues[idx])
+  );
 
   let queryStr = JSON.stringify(reqQuery);
 
@@ -24,6 +36,18 @@ exports.getAllLocations = asyncHandler(async (req, res, next) => {
   if (req.query.sort) {
     const sortByArr = req.query.sort.split(",");
 
+    sortByArr.forEach((val) => {
+      let order;
+
+      if (val[0] === "-") {
+        order = "descending";
+      } else {
+        order = "ascending";
+      }
+
+      uiValues.sorting[values.replace("-", "")] = order;
+    });
+
     const sortByStr = sortByArr.join(" ");
 
     query = query.sort(sortByStr);
@@ -36,6 +60,7 @@ exports.getAllLocations = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: locations,
+    uiValues,
   });
 });
 
