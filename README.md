@@ -14,6 +14,8 @@ Create back-end with node.js and express
 1. Dotenv - loads environmental variables from a .env file with process.env
 1. nodemon - makes development easier, helps development with node.js applications by automatically restarting the application wehen file changes in the directory are detected. So we don't have to restart our server every time we make an update to our files.
 
+`npm install axios @material-ui/core @material-ui/lab @material-ui/icons`
+
 dao directory - stands for data access object
 Create front-end with React.js:
 Mongo Db uses MongoDB query language
