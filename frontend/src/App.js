@@ -3,10 +3,12 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 import LocationPage from "./pages/LocationPage";
 
+import Navbar from "./components/Navbar";
+
 function App() {
   return (
     <div className="App">
-      <h1>Hello World</h1>
+      <Navbar />
       <Router>
         <Switch>
           <Route exact path="/" component={LocationPage} />
