@@ -57,6 +57,19 @@ exports.getAllLocations = asyncHandler(async (req, res, next) => {
 
   const locations = await query;
 
+  const maxObjectId = await Location.find()
+    .sort({ objectId: -1 })
+    .limit(1)
+    .select("-_id objectId");
+
+  const minObjectId = await Location.find()
+    .sort({ objectId: 1 })
+    .limit(1)
+    .select("_id objectId");
+
+  uiValues.maxObjectId = maxObjectId[0].objectId;
+  uiValues.minObjectId = minObjectId[0].objectId;
+
   res.status(200).json({
     success: true,
     data: locations,
