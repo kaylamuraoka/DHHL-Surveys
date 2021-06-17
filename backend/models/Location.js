@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const locationSchema = new mongoose.Schema(
   {
     objectId: {
-      type: String,
+      type: Number,
       required: [true, "Please provide a unique object Id"],
       unique: true,
     },

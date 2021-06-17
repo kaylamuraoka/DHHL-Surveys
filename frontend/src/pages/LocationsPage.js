@@ -13,7 +13,7 @@ import {
   FormControlLabel,
   Radio,
 } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 import axios from "axios";
 import LocationCard from "../components/LocationCard";
@@ -45,6 +45,9 @@ const LocationsPage = () => {
   // Material UI Styles
   const classes = useStyles();
   const history = useHistory();
+  const location = useLocation();
+
+  const params = location.search ? location.search : null;
 
   // Component State
   const [locations, setLocations] = useState([]);
@@ -62,9 +65,17 @@ const LocationsPage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        let query;
+
+        if (params && !filter) {
+          query = params;
+        } else {
+          query = filter;
+        }
+
         const { data } = await axios({
           method: "GET",
-          url: `/api/v1/locations`,
+          url: `/api/v1/locations${query}`,
           cancelToken: new axios.CancelToken((c) => (cancel = c)),
         });
 
@@ -76,7 +87,9 @@ const LocationsPage = () => {
     };
 
     fetchData();
-  }, [filter]);
+
+    return () => cancel();
+  }, [filter, params]);
 
   const onSliderCommitHandler = (e, newValue) => {
     buildRangeFilter(newValue);
