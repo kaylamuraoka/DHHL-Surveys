@@ -12,6 +12,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Button,
 } from "@material-ui/core";
 import { useHistory, useLocation } from "react-router-dom";
 
@@ -55,8 +56,29 @@ const LocationsPage = () => {
 
   const [sliderMax, setSliderMax] = useState(1000);
   const [objectIdRange, setObjectIdRange] = useState([25, 75]);
+  const [objectIdOrder, setObjectIdOrder] = useState("descending");
 
   const [filter, setFilter] = useState("");
+  const [sorting, setSorting] = useState("");
+
+  const updateUIValues = (uiValues) => {
+    setSliderMax(uiValues.maxObjectId);
+
+    if (uiValues.filtering.objectId) {
+      let objectIdFilter = uiValues.filtering.objectId;
+
+      setObjectIdRange([
+        Number(objectIdFilter.gte),
+        Number(objectIdFilter.lte),
+      ]);
+    }
+
+    if (uiValues.sorting.objectId) {
+      let objectIdSort = uiValues.sorting.objectId;
+
+      setObjectIdOrder(objectIdSort);
+    }
+  };
 
   // Side effects
   useEffect(() => {
@@ -73,6 +95,14 @@ const LocationsPage = () => {
           query = filter;
         }
 
+        if (sorting) {
+          if (query.length === 0) {
+            query = `?sort=${sorting}`;
+          } else {
+            query = query + "&sort=" + sorting;
+          }
+        }
+
         const { data } = await axios({
           method: "GET",
           url: `/api/v1/locations${query}`,
@@ -81,7 +111,9 @@ const LocationsPage = () => {
 
         setLocations(data.data);
         setLoading(false);
+        updateUIValues(data.uiValues);
       } catch (error) {
+        if (axios.isCancel(error)) return;
         console.log(error.response.data);
       }
     };
@@ -89,10 +121,31 @@ const LocationsPage = () => {
     fetchData();
 
     return () => cancel();
-  }, [filter, params]);
+  }, [filter, params, sorting]);
+
+  const handleObjectIdInputChange = (e, type) => {
+    let newRange;
+    if (type === "lower") {
+      newRange = [...objectIdRange];
+      newRange[0] = Number(e.target.value);
+
+      setObjectIdRange(newRange);
+    }
+
+    if (type === "upper") {
+      newRange = [...objectIdRange];
+      newRange[1] = Number(e.target.value);
+
+      setObjectIdRange(newRange);
+    }
+  };
 
   const onSliderCommitHandler = (e, newValue) => {
     buildRangeFilter(newValue);
+  };
+
+  const onTextfieldCommitHandler = () => {
+    buildRangeFilter(objectIdRange);
   };
 
   const buildRangeFilter = (newValue) => {
@@ -101,6 +154,23 @@ const LocationsPage = () => {
     setFilter(urlFilter);
 
     history.push(urlFilter);
+  };
+
+  const handleSortChange = (e) => {
+    setObjectIdOrder(e.target.value);
+
+    if (e.target.value === "ascending") {
+      setSorting("objectId");
+    } else if (e.target.value === "descending") {
+      setSorting("-objectId");
+    }
+  };
+
+  const clearAllFilters = () => {
+    setFilter("");
+    setSorting("");
+    setObjectIdRange([0, sliderMax]);
+    history.push("/");
   };
 
   return (
@@ -117,6 +187,7 @@ const LocationsPage = () => {
                 max={sliderMax}
                 value={objectIdRange}
                 valueLabelDisplay="auto"
+                disabled={loading}
                 onChange={(e, newValue) => setObjectIdRange(newValue)}
                 onChangeCommitted={onSliderCommitHandler}
               />
@@ -129,7 +200,9 @@ const LocationsPage = () => {
                   variant="outlined"
                   type="number"
                   disabled={loading}
-                  value={0}
+                  value={objectIdRange[0]}
+                  onChange={(e) => handleObjectIdInputChange(e, "lower")}
+                  onBlur={onTextfieldCommitHandler}
                 />
 
                 <TextField
@@ -139,7 +212,9 @@ const LocationsPage = () => {
                   variant="outlined"
                   type="number"
                   disabled={loading}
-                  value={123}
+                  value={objectIdRange[1]}
+                  onChange={(e) => handleObjectIdInputChange(e, "upper")}
+                  onBlur={onTextfieldCommitHandler}
                 />
               </div>
             </div>
@@ -149,14 +224,21 @@ const LocationsPage = () => {
             <Typography gutterBottom>Sort By</Typography>
 
             <FormControl component="fieldset" className={classes.filters}>
-              <RadioGroup aria-label="objectId-order" name="objectId-order">
+              <RadioGroup
+                aria-label="objectId-order"
+                name="objectId-order"
+                value={objectIdOrder}
+                onChange={handleSortChange}
+              >
                 <FormControlLabel
+                  value="descending"
                   disabled={loading}
                   control={<Radio />}
                   label="Object ID: Highest - Lowest"
                 />
 
                 <FormControlLabel
+                  value="ascending"
                   disabled={loading}
                   control={<Radio />}
                   label="Object ID: Lowest - Highest"
@@ -165,6 +247,9 @@ const LocationsPage = () => {
             </FormControl>
           </Grid>
         </Grid>
+        <Button size="small" color="primary" onClick={clearAllFilters}>
+          Clear All
+        </Button>
       </Paper>
 
       {/* Locations Listing */}
